@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5x5 Grid Memory Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 50px);
+            grid-template-rows: repeat(5, 50px);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .grid-item {
+            width: 50px;
+            height: 50px;
+            background-color: #ddd;
+            border: 1px solid #bbb;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        #start-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #start-button:hover {
+            background-color: #45a049;
+        }
+
+        #message {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="scratch.html">Scratch Page</a>
+        <a href="../index.html">Professional Resume Page</a>
+    
+    </div>
+
+
+
+
+
+    <div id="game-container">
+        <h1>5x5 Grid Memory Game</h1>
+        <div id="grid" class="grid-container"></div>
+        <button id="start-button">Start Game</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const gridSize = 5;
+        const totalSquares = gridSize * gridSize;
+        const maxMistakes = 3; // Max allowed mistakes
+        let pattern = [];
+        let userInput = [];
+        let incorrectGuesses = 0;
+        let isPlaying = false;
+
+        const gridContainer = document.getElementById('grid');
+        const startButton = document.getElementById('start-button');
+        const message = document.getElementById('message');
+
+        // Function to create the 5x5 grid
+        function createGrid() {
+            gridContainer.innerHTML = '';
+            for (let i = 0; i < totalSquares; i++) {
+                const square = document.createElement('div');
+                square.classList.add('grid-item');
+                square.dataset.index = i;
+                square.addEventListener('click', () => handleUserInput(i)); // Add event listener here only once
+                gridContainer.appendChild(square);
+            }
+        }
+
+        // Function to start the game
+        function startGame() {
+            pattern = [];
+            userInput = [];
+            incorrectGuesses = 0;
+            isPlaying = true;
+            message.textContent = 'Memorize the filled squares!';
+            resetGrid();
+
+            // Generate a random pattern of filled squares
+            const patternLength = 5; // Number of squares to fill in
+            for (let i = 0; i < patternLength; i++) {
+                const randomIndex = Math.floor(Math.random() * totalSquares);
+                if (!pattern.includes(randomIndex)) {
+                    pattern.push(randomIndex);
+                } else {
+                    i--; // Ensure uniqueness
+                }
+            }
+
+            // Show the pattern
+            showPattern();
+        }
+
+        // Function to display the pattern by highlighting filled squares
+        function showPattern() {
+            pattern.forEach(index => {
+                const square = document.querySelector(`[data-index="${index}"]`);
+                square.style.backgroundColor = 'blue';
+            });
+
+            setTimeout(() => {
+                resetGrid();
+                userInput = [];
+                message.textContent = 'Now, click on the squares that were filled!';
+            }, 2000); // Pattern stays visible for 2 seconds
+        }
+
+        // Function to handle user input (clicking on squares)
+        function handleUserInput(index) {
+            if (!isPlaying) return;
+
+            const square = document.querySelector(`[data-index="${index}"]`);
+
+            // If user selects a correct square, mark it as filled
+            if (pattern.includes(index)) {
+                square.style.backgroundColor = 'blue';
+                userInput.push(index);
+            } else {
+                square.style.backgroundColor = 'red'; // Incorrect click
+                incorrectGuesses++;
+
+                // Reset color after 300ms
+                setTimeout(() => square.style.backgroundColor = '#ddd', 300);
+
+                // Check if player has exceeded max incorrect guesses
+                if (incorrectGuesses >= maxMistakes) {
+                    message.textContent = 'Game Over! You made too many mistakes.';
+                    isPlaying = false;
+                    return;
+                } else {
+                    message.textContent = `Incorrect! You have ${maxMistakes - incorrectGuesses} guesses left.`;
+                }
+                return;
+            }
+
+            // Check if the user has clicked all the correct squares
+            if (userInput.length === pattern.length) {
+                message.textContent = 'Congratulations! You recreated the pattern!';
+                isPlaying = false;
+            }
+        }
+
+        // Function to reset the grid (clear the user clicks)
+        function resetGrid() {
+            const gridItems = document.querySelectorAll('.grid-item');
+            gridItems.forEach(item => {
+                item.style.backgroundColor = '#ddd'; // Reset color to default
+            });
+        }
+
+        // Event listener to start the game
+        startButton.addEventListener('click', startGame);
+
+        // Initialize the grid
+        createGrid();
+    </script>
+
+</body>
+</html>
+
